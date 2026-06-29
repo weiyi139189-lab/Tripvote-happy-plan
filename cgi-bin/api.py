@@ -5,6 +5,7 @@ import sys
 import time
 import uuid
 from pathlib import Path
+from urllib.parse import parse_qs
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -62,7 +63,8 @@ def public_state(state, current_member_id=None):
 
 
 def main():
-    path = (os.environ.get("PATH_INFO") or "/state").strip("/")
+    query = parse_qs(os.environ.get("QUERY_STRING") or "")
+    path = (query.get("action", [""])[0] or os.environ.get("PATH_INFO") or "/state").strip("/")
     method = os.environ.get("REQUEST_METHOD", "GET").upper()
     state = read_state()
 
@@ -81,6 +83,7 @@ def main():
             "id": uuid.uuid4().hex[:10],
             "name": name,
             "className": class_name,
+            "clientJoinId": str(body.get("clientJoinId", "")),
             "joinedAt": int(time.time()),
         }
         state["members"].append(member)

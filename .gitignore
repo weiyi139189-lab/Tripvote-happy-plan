@@ -3,3 +3,6 @@ collab-state.json
 __pycache__/
 .DS_Store
 node_modules/
+
+# Local Netlify folder
+.netlify

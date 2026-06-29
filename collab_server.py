@@ -109,6 +109,7 @@ class Handler(BaseHTTPRequestHandler):
                     "id": uuid.uuid4().hex[:10],
                     "name": name,
                     "className": class_name,
+                    "clientJoinId": str(body.get("clientJoinId", "")),
                     "joinedAt": int(time.time()),
                 }
                 state["members"].append(member)

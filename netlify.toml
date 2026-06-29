@@ -1,7 +1,7 @@
 [build]
-  publish = "."
+  publish = "public"
   functions = "netlify/functions"
-  command = "npm install"
+  command = "npm install && mkdir -p public && cp index.html styles.css app.js public/"
 
 [[redirects]]
   from = "/api/state"
