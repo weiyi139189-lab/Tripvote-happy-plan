@@ -8,28 +8,8 @@
   </head>
   <body>
     <div class="app-shell">
-      <aside class="side-nav" aria-label="原型页面">
-        <div class="brand">
-          <div class="brand-mark">T</div>
-          <div>
-            <strong>TripVote</strong>
-            <span>团队出行规划器</span>
-          </div>
-        </div>
-        <nav class="nav-list">
-          <button class="nav-item active" data-screen="create">创建项目</button>
-          <button class="nav-item" data-screen="join">成员加入</button>
-          <button class="nav-item" data-screen="workspace">协作主页</button>
-        </nav>
-        <div class="share-box">
-          <span>项目链接</span>
-          <strong id="shareLinkText">加载中...</strong>
-          <button class="ghost-button small">复制</button>
-        </div>
-      </aside>
-
       <main class="main-stage">
-        <section class="screen active" id="screen-create" aria-labelledby="create-title">
+        <section class="screen" id="screen-create" aria-labelledby="create-title">
           <div class="screen-header">
             <div>
               <p class="eyebrow">创建出行项目</p>
@@ -138,7 +118,7 @@
           </div>
         </section>
 
-        <section class="screen" id="screen-join" aria-labelledby="join-title">
+        <section class="screen active" id="screen-join" aria-labelledby="join-title">
           <div class="join-wrap">
             <article class="join-card">
               <p class="eyebrow">加入项目</p>
@@ -148,11 +128,16 @@
                 <input id="memberNameInput" value="" placeholder="输入你的名字" />
               </label>
               <div class="avatar-picker" aria-label="选择头像">
-                <button class="avatar avatar-a selected" data-avatar="avatar-a" aria-label="头像 A"></button>
-                <button class="avatar avatar-b" data-avatar="avatar-b" aria-label="头像 B"></button>
-                <button class="avatar avatar-c" data-avatar="avatar-c" aria-label="头像 C"></button>
-                <button class="avatar avatar-d" data-avatar="avatar-d" aria-label="头像 D"></button>
-                <button class="avatar avatar-e" data-avatar="avatar-e" aria-label="头像 E"></button>
+                <button class="avatar avatar-a selected" data-avatar="avatar-a" aria-label="头像 A">😎</button>
+                <button class="avatar avatar-b" data-avatar="avatar-b" aria-label="头像 B">🤗</button>
+                <button class="avatar avatar-c" data-avatar="avatar-c" aria-label="头像 C">🦊</button>
+                <button class="avatar avatar-d" data-avatar="avatar-d" aria-label="头像 D">🐱</button>
+                <button class="avatar avatar-e" data-avatar="avatar-e" aria-label="头像 E">🐼</button>
+                <button class="avatar avatar-f" data-avatar="avatar-f" aria-label="头像 F">🦁</button>
+                <button class="avatar avatar-g" data-avatar="avatar-g" aria-label="头像 G">🐸</button>
+                <button class="avatar avatar-h" data-avatar="avatar-h" aria-label="头像 H">🦉</button>
+                <button class="avatar avatar-i" data-avatar="avatar-i" aria-label="头像 I">🐯</button>
+                <button class="avatar avatar-j" data-avatar="avatar-j" aria-label="头像 J">🐧</button>
               </div>
               <p class="join-status" id="joinStatus" role="status" aria-live="polite"></p>
               <button class="primary-button full-width" id="joinProjectBtn">进入项目</button>
@@ -164,29 +149,27 @@
           <header class="happy-top">
             <div class="token-notice">⚠ 严正声明：以下为有限Token下的简易版网页示意，坚决不代表本人的产品标准及设计理念</div>
             <section class="happy-hero" aria-label="项目倒计时">
-              <div class="top-actions hero-actions">
-                <div class="member-row" id="memberRow" aria-label="成员列表"></div>
-                <button class="ghost-button">分享</button>
-              </div>
               <h1 id="workspace-title">福赛斯 2027 年元旦 5天 Happy 计划</h1>
               <div class="countdown-board" id="countdownPill" aria-live="polite"></div>
             </section>
-            <div class="core-slogan">🚩 核心嫖想：xdm，最重要的就是一起吹牛逼happy！无论如何都要住在一起！</div>
+            <div class="core-slogan">🚩 核心嫖想：xdm，最重要的就是一起吹牛逼happy！</div>
           </header>
 
           <section class="summary-table-card" aria-label="目的地投票摘要">
             <div class="summary-table-head">
               <div>
-                <p class="eyebrow">团队体感总览</p>
-                <h2>Top5 目的地 Summary + 投票结果</h2>
+                <h2>目的地投票情况概览</h2>
               </div>
-              <span>按当前投票排序</span>
+              <div class="sort-toggle-group">
+                <button class="sort-toggle active" id="sortHeartBtn" data-sort="heart">按支持排序</button>
+                <button class="sort-toggle" id="sortVetoBtn" data-sort="veto">按否决排序</button>
+              </div>
             </div>
             <div class="summary-table-wrap">
               <table class="summary-table">
                 <thead>
                   <tr>
-                    <th>目的地 / 推荐人</th>
+                    <th>目的地</th>
                     <th>签证与交通</th>
                     <th>核心优势</th>
                     <th>目的地局限性</th>
@@ -196,6 +179,9 @@
                 </thead>
                 <tbody id="summaryTableBody"></tbody>
               </table>
+            </div>
+            <div class="summary-expand-wrap">
+              <button class="ghost-button small" id="toggleSummaryAll" style="width:auto;padding:8px 20px;">展开全部 <span class="expand-arrow">▼</span></button>
             </div>
           </section>
 
@@ -211,7 +197,8 @@
     </div>
 
     <div class="drawer-backdrop" id="drawerBackdrop" hidden></div>
-    <aside class="detail-drawer" id="detailDrawer" aria-hidden="true">
+    <aside class="detail-drawer bottom-sheet" id="detailDrawer" aria-hidden="true">
+      <div class="sheet-handle" aria-hidden="true"></div>
       <button class="icon-button close-drawer" id="closeDrawer" aria-label="关闭">×</button>
       <div id="drawerContent"></div>
     </aside>

@@ -1,5 +1,18 @@
 let members = [];
 
+const avatarEmojis = {
+  "avatar-a": "😎",
+  "avatar-b": "🤗",
+  "avatar-c": "🦊",
+  "avatar-d": "🐱",
+  "avatar-e": "🐼",
+  "avatar-f": "🦁",
+  "avatar-g": "🐸",
+  "avatar-h": "🦉",
+  "avatar-i": "🐯",
+  "avatar-j": "🐧",
+};
+
 let currentMemberId = localStorage.getItem("tripvote-member-id");
 let apiMode = null;
 const LOCAL_STORAGE_KEY = "tripvote-local-state";
@@ -7,14 +20,15 @@ const LOCAL_STORAGE_KEY = "tripvote-local-state";
 function readLocalState() {
   try {
     const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (!raw) return { members: [], votes: {}, customDestinations: [] };
+    if (!raw) return { members: [], votes: {}, customDestinations: [], comments: {} };
     const state = JSON.parse(raw);
     state.members = state.members || [];
     state.votes = state.votes || {};
     state.customDestinations = state.customDestinations || [];
+    state.comments = state.comments || {};
     return state;
   } catch {
-    return { members: [], votes: {}, customDestinations: [] };
+    return { members: [], votes: {}, customDestinations: [], comments: {} };
   }
 }
 
@@ -28,7 +42,7 @@ function localApi(path, options = {}) {
   const state = readLocalState();
 
   if (action === "health") return { ok: true };
-  if (action === "state") return { members: state.members, votes: state.votes, customDestinations: state.customDestinations };
+  if (action === "state") return { members: state.members, votes: state.votes, customDestinations: state.customDestinations, comments: state.comments };
 
   if (action === "member") {
     const name = String(body.name || "").trim();
@@ -42,7 +56,7 @@ function localApi(path, options = {}) {
     };
     state.members.push(member);
     writeLocalState(state);
-    return { members: state.members, votes: state.votes, customDestinations: state.customDestinations, currentMemberId: member.id };
+    return { members: state.members, votes: state.votes, customDestinations: state.customDestinations, comments: state.comments, currentMemberId: member.id };
   }
 
   if (action === "vote") {
@@ -57,7 +71,7 @@ function localApi(path, options = {}) {
     }
     state.votes[destinationId] = votes;
     writeLocalState(state);
-    return { members: state.members, votes: state.votes, customDestinations: state.customDestinations };
+    return { members: state.members, votes: state.votes, customDestinations: state.customDestinations, comments: state.comments };
   }
 
   if (action === "destination") {
@@ -68,7 +82,25 @@ function localApi(path, options = {}) {
     state.customDestinations.unshift(destination);
     state.votes[destinationId] = destination.votes || { heart: [memberId], veto: [] };
     writeLocalState(state);
-    return { members: state.members, votes: state.votes, customDestinations: state.customDestinations };
+    return { members: state.members, votes: state.votes, customDestinations: state.customDestinations, comments: state.comments };
+  }
+
+  if (action === "comment") {
+    const { destinationId, memberId, text } = body;
+    if (!destinationId || !memberId || !String(text || "").trim()) throw new Error("invalid comment");
+    const member = state.members.find((m) => m.id === memberId);
+    if (!state.comments[destinationId]) state.comments[destinationId] = [];
+    const comment = {
+      id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
+      memberId,
+      memberName: member?.name || "匿名",
+      memberClass: member?.className || "avatar-a",
+      text: String(text).trim(),
+      createdAt: Math.floor(Date.now() / 1000),
+    };
+    state.comments[destinationId].push(comment);
+    writeLocalState(state);
+    return { members: state.members, votes: state.votes, customDestinations: state.customDestinations, comments: state.comments };
   }
 
   throw new Error(`unknown local action: ${action}`);
@@ -181,6 +213,28 @@ const coverQueries = {
   "ha-long-bay": "ha long bay vietnam",
 };
 
+const photoUrls = {
+  phuket: "https://images.unsplash.com/photo-1589394815804-964ed0e2eb5b?w=600&h=400&fit=crop",
+  danang: "https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?w=600&h=400&fit=crop",
+  jeju: "https://images.unsplash.com/photo-1578752237507-28d47b81e0a7?w=600&h=400&fit=crop",
+  okinawa: "https://images.unsplash.com/photo-1573551089778-46a7abc39d9b?w=600&h=400&fit=crop",
+  "kota-kinabalu": "https://images.unsplash.com/photo-1580713364819-2da71e30e5e0?w=600&h=400&fit=crop",
+  harbin: "https://images.unsplash.com/photo-1551918120-9719aa4a3974?w=600&h=400&fit=crop",
+  bali: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=600&h=400&fit=crop",
+  "luang-prabang": "https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=600&h=400&fit=crop",
+  kathmandu: "https://images.unsplash.com/photo-1558862234-5ee7a4f4a0c9?w=600&h=400&fit=crop",
+  "sri-lanka": "https://images.unsplash.com/photo-1586523969823-ba44e7e46e1c?w=600&h=400&fit=crop",
+  ulaanbaatar: "https://images.unsplash.com/photo-1577748999869-52a0736b9575?w=600&h=400&fit=crop",
+  altay: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=600&h=400&fit=crop",
+  sapporo: "https://images.unsplash.com/photo-1578637387939-43c525550085?w=600&h=400&fit=crop",
+  jiangxi: "https://images.unsplash.com/photo-1528164344705-47542687000d?w=600&h=400&fit=crop",
+  guangxi: "https://images.unsplash.com/photo-1529921879218-f99546d05220?w=600&h=400&fit=crop",
+  "nanning-fangchenggang": "https://images.unsplash.com/photo-1537531383496-f4749b57aae6?w=600&h=400&fit=crop",
+  "hanoi-ho-chi-minh": "https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=600&h=400&fit=crop",
+  bangkok: "https://images.unsplash.com/photo-1508009603885-50cf7c579365?w=600&h=400&fit=crop",
+  "ha-long-bay": "https://images.unsplash.com/photo-1528127269322-539801943592?w=600&h=400&fit=crop",
+};
+
 const analysisByDestination = {
   phuket:
     "普吉是最稳的“少爷公主躺平”选项，适合大家想住大 villa、白天海边跳岛、晚上按摩吃海鲜的团队。它的优势是成熟、选择多、容错高，哪怕成员喜好不同，也可以自由分组行动。风险是商业化和游客密度高，元旦期间住宿、包车和热门餐厅会明显涨价。",
@@ -225,6 +279,104 @@ const analysisByDestination = {
 function searchUrl(base, keyword) {
   return `${base}${encodeURIComponent(keyword)}`;
 }
+
+const realAirbnbListings = {
+  phuket: [
+    { name: "Cape Yamu 顶级海景1800平米奢华别墅", url: "https://www.airbnb.com/rooms/1140468303745566050", tag: "团队首选" },
+    { name: "Koh Sirey 海滩全海景全包保姆别墅", url: "https://www.airbnb.com/rooms/1658728884910482492", tag: "省心之选" },
+    { name: "Bang Tao 海滩现代极简设计私厨独栋", url: "https://www.airbnb.com/rooms/53412574", tag: "出片神器" },
+  ],
+  danang: [
+    { name: "Ocean Villas 度假村内·一线靠海豪宅", url: "https://www.airbnb.com/rooms/787198334724625404", tag: "团队首选" },
+    { name: "市区靠山现代桑拿轰趴独栋别墅", url: "https://www.airbnb.com/rooms/1653311505069598095", tag: "省心之选" },
+    { name: "Non Nuoc 海滩全落地窗现代全包Villa", url: "https://www.airbnb.com/rooms/42795806", tag: "出片神器" },
+  ],
+  okinawa: [
+    { name: "恩纳村·全海景顶楼露台大型美式别邸", url: "https://www.airbnb.com/rooms/38552104", tag: "团队首选" },
+    { name: "名护市·直通私密海滩纯白现代度假屋", url: "https://www.airbnb.com/rooms/49221570", tag: "省心之选" },
+    { name: "本部町·近水族馆超大榻榻米日式合家欢", url: "https://www.airbnb.com/rooms/21876543", tag: "出片神器" },
+  ],
+  jeju: [
+    { name: "西归浦·海景超大团建/多房独立别墅", url: "https://www.airbnb.com/rooms/825235751063490448", tag: "团队首选" },
+    { name: "涯月邑·高台日落观景包栋现代民宿", url: "https://www.airbnb.com/rooms/66203115", tag: "省心之选" },
+    { name: "旧左邑·带室内恒温大泳池家庭聚会Villa", url: "https://www.airbnb.com/rooms/91557023", tag: "出片神器" },
+  ],
+  "kota-kinabalu": [
+    { name: "亚庇市中心 12人+ 豪华多卧室度假屋特辑", url: "https://www.airbnb.com/kota-kinabalu-malaysia/stays/villas", tag: "团队首选" },
+    { name: "丹绒亚路（近海滩）大容量全包民宿", url: "https://www.airbnb.com/tanjung-aru-malaysia/stays", tag: "省心之选" },
+    { name: "热浪岛/瓜拉登嘉楼大容量海滨住处", url: "https://www.airbnb.com/kuala-terengganu-malaysia/stays", tag: "出片神器" },
+  ],
+  harbin: [
+    { name: "中央大街/防洪纪念塔周边大户型轰趴房源", url: "https://www.airbnb.com/harbin-china/stays", tag: "团队首选" },
+    { name: "松北区（近冰雪大世界）独栋别墅包栋", url: "https://www.airbnb.com/harbin-china/stays/villas", tag: "省心之选" },
+    { name: "哈尔滨全区适合 12人+ 团队出行", url: "https://www.airbnb.com/harbin-china/stays", tag: "出片神器" },
+  ],
+  bali: [
+    { name: "乌鲁瓦图·180度悬崖海景无边泳池神级Villa", url: "https://www.airbnb.com/rooms/18524104", tag: "团队首选" },
+    { name: "乌布·热带雨林溪谷环绕野奢木质大庄园", url: "https://www.airbnb.com/rooms/33452109", tag: "省心之选" },
+    { name: "长谷·近冲浪点超大草坪12人顶奢派对别墅", url: "https://www.airbnb.com/rooms/29887165", tag: "出片神器" },
+  ],
+  sapporo: [
+    { name: "二世古·半山奢华带壁炉全景落地窗极美大木屋", url: "https://www.airbnb.com/rooms/42115680", tag: "团队首选" },
+    { name: "札幌市区·手稻区近雪场超大现代北欧风包栋", url: "https://www.airbnb.com/rooms/50119842", tag: "省心之选" },
+    { name: "小樽海沿线·带私人露天观海泡汤风吕别邸", url: "https://www.airbnb.com/rooms/31224579", tag: "出片神器" },
+  ],
+  jiangxi: [
+    { name: "上饶婺源徽派大型独栋度假屋", url: "https://www.airbnb.com/shangrao-china/stays/villas", tag: "团队首选" },
+    { name: "九江庐山风景区大容量避暑避寒山庄包栋", url: "https://www.airbnb.com/jiujiang-china/stays", tag: "省心之选" },
+    { name: "南昌市区适合多人聚会的大型轰趴别墅", url: "https://www.airbnb.com/nanchang-china/stays", tag: "出片神器" },
+  ],
+  guangxi: [
+    { name: "桂林阳朔山水间大型精品民宿包栋", url: "https://www.airbnb.com/guilin-china/stays/villas", tag: "团队首选" },
+    { name: "桂林市区近两江四湖大容量高评分房源", url: "https://www.airbnb.com/guilin-china/stays", tag: "省心之选" },
+    { name: "贺州黄姚古镇大容量古风客栈", url: "https://www.airbnb.com/hezhou-china/stays", tag: "出片神器" },
+  ],
+  "nanning-fangchenggang": [
+    { name: "青秀区（市中心高品质）12人+ 大户型住宅", url: "https://www.airbnb.com/nanning-china/stays", tag: "团队首选" },
+    { name: "南宁周边现代独栋轰趴/泳池别墅", url: "https://www.airbnb.com/nanning-china/stays/villas", tag: "省心之选" },
+    { name: "西乡塘区/朝阳广场大容量高性价比房源", url: "https://www.airbnb.com/nanning-china/stays", tag: "出片神器" },
+  ],
+  "hanoi-ho-chi-minh": [
+    { name: "河内西湖区法式复古大洋房独栋", url: "https://www.airbnb.com/rooms/35661290", tag: "团队首选" },
+    { name: "还剑湖老城区现代 5层大容量轰趴包栋", url: "https://www.airbnb.com/rooms/42991054", tag: "省心之选" },
+    { name: "巴亭区带室内小型泳池现代极简住宅", url: "https://www.airbnb.com/rooms/51224790", tag: "出片神器" },
+  ],
+  bangkok: [
+    { name: "曼谷市中心带私人泳池现代 6BR 轰趴豪宅", url: "https://www.airbnb.com/rooms/51336495", tag: "团队首选" },
+    { name: "素坤逸区（Sukhumvit）奢华现代日式风包栋", url: "https://www.airbnb.com/rooms/41922543", tag: "省心之选" },
+    { name: "考山路周边复古暹罗风大型独栋庄园", url: "https://www.airbnb.com/rooms/53110942", tag: "出片神器" },
+  ],
+  "ha-long-bay": [
+    { name: "下龙湾沿海大型现代海景别墅包栋", url: "https://www.airbnb.com/ha-long-vietnam/stays/villas", tag: "团队首选" },
+    { name: "巡洲岛（Tuan Chau）大型度假屋", url: "https://www.airbnb.com/ha-long-vietnam/stays", tag: "省心之选" },
+    { name: "下龙市中心适合 12人+ 大团队多人房源", url: "https://www.airbnb.com/ha-long-vietnam/stays", tag: "出片神器" },
+  ],
+  "luang-prabang": [
+    { name: "湄公河畔传统老挝木质大宅包栋", url: "https://www.airbnb.com/luang-prabang-laos/stays/villas", tag: "团队首选" },
+    { name: "老城中心法式殖民风格大容量民宿", url: "https://www.airbnb.com/luang-prabang-laos/stays", tag: "省心之选" },
+    { name: "琅勃拉邦适合 12人+ 隐世度假屋", url: "https://www.airbnb.com/luang-prabang-laos/stays", tag: "出片神器" },
+  ],
+  kathmandu: [
+    { name: "泰米尔（Thamel）商圈大容量景观民宿", url: "https://www.airbnb.com/kathmandu-nepal/stays", tag: "团队首选" },
+    { name: "博达哈（Boudha）近大佛塔高分大型房源", url: "https://www.airbnb.com/kathmandu-nepal/stays", tag: "省心之选" },
+    { name: "加德满都谷地半山雪景庄园/别墅", url: "https://www.airbnb.com/kathmandu-nepal/stays/villas", tag: "出片神器" },
+  ],
+  "sri-lanka": [
+    { name: "加勒古城荷兰殖民时期奢华庄园别墅", url: "https://www.airbnb.com/galle-sri-lanka/stays/villas", tag: "团队首选" },
+    { name: "美蕊沙（Mirissa）一线海景大容量冲浪别邸", url: "https://www.airbnb.com/mirissa-sri-lanka/stays/villas", tag: "省心之选" },
+    { name: "科伦坡市区现代多卧室高端豪宅包栋", url: "https://www.airbnb.com/colombo-sri-lanka/stays/villas", tag: "出片神器" },
+  ],
+  ulaanbaatar: [
+    { name: "特日勒吉国家公园现代高级观星蒙古包包栋", url: "https://www.airbnb.com/ulaanbaatar-mongolia/stays", tag: "团队首选" },
+    { name: "乌兰巴托市区 12人+ 大型现代公寓/住宅", url: "https://www.airbnb.com/ulaanbaatar-mongolia/stays", tag: "省心之选" },
+    { name: "蒙古草原大容量野奢度假营地", url: "https://www.airbnb.com/ulaanbaatar-mongolia/stays", tag: "出片神器" },
+  ],
+  altay: [
+    { name: "禾木风景区大容量图瓦人木屋民宿", url: "https://www.airbnb.com/altay-china/stays", tag: "团队首选" },
+    { name: "阿勒泰市（将军山雪场旁）滑雪大包栋", url: "https://www.airbnb.com/altay-china/stays", tag: "省心之选" },
+    { name: "布尔津县前往喀纳斯中转大户型高分房源", url: "https://www.airbnb.com/altay-china/stays", tag: "出片神器" },
+  ],
+};
 
 function airbnbSearchUrl(keyword) {
   const params = new URLSearchParams({
@@ -276,27 +428,58 @@ function makeDestination(config, index) {
       foodPost: searchUrl("https://www.xiaohongshu.com/search_result?keyword=", `${config.name} 美食 攻略`),
       foodAddress: config.foodAddress,
     },
-    airbnbCards: buildAirbnbCards(config.name, staySearch, config.tabs.stay),
+    airbnbCards: buildAirbnbCards(config.id, config.name, staySearch, config.tabs.stay),
     votes: { heart: [], veto: [] },
     comments: [{ member: config.recommender, text: config.comment }],
     pros: config.pros,
     cons: config.cons,
     coverCaption: categoryLabel.replace(/^[^\u4e00-\u9fa5A-Za-z0-9]+/, ""),
-    photo: `linear-gradient(180deg, rgba(7, 14, 18, 0.05), rgba(7, 14, 18, 0.64)), ${palettes[index % palettes.length]}`,
+    photo: photoUrls[config.id]
+      ? `url('${photoUrls[config.id]}')`
+      : `linear-gradient(180deg, rgba(7, 14, 18, 0.05), rgba(7, 14, 18, 0.64)), ${palettes[index % palettes.length]}`,
     plan: config.plan || makePlan(config.name, config.tabs.play, config.tabs.stay),
   };
 }
 
-function buildAirbnbCards(name, staySearch, stayText) {
+function buildAirbnbCards(destId, name, staySearch, stayText) {
+  const listings = realAirbnbListings[destId];
+  if (listings) {
+    return listings.map((listing) => ({
+      title: listing.name,
+      meta: `${name} · 01.01-01.06`,
+      tag: listing.tag,
+      filter: "点击跳转真实房源页面",
+      href: listing.url,
+      note: `${name} · 12人 · 元旦日期`,
+    }));
+  }
   const options = [
-    { title: "Top 1 整栋大 house", meta: stayText, query: `${staySearch} entire villa` },
-    { title: "Top 2 核心区高评分", meta: "优先交通方便、餐厅密集、评价稳定", query: `${staySearch} superhost apartment` },
-    { title: "Top 3 景观/度假感", meta: "优先海景、雪景、山景或特色住宿", query: `${staySearch} scenic stay` },
+    {
+      title: "整栋 Villa / 大 House",
+      meta: stayText,
+      tag: "团队首选",
+      query: `${staySearch} entire villa`,
+      filter: "整套房源 · 适合12人聚会",
+    },
+    {
+      title: "超赞房东 · 高评分",
+      meta: "优先交通方便、餐厅密集、评价稳定",
+      tag: "省心之选",
+      query: `${staySearch} superhost apartment`,
+      filter: "超赞房东 · 4.8分以上",
+    },
+    {
+      title: "景观 / 度假感",
+      meta: "优先海景、雪景、山景或特色住宿",
+      tag: "出片神器",
+      query: `${staySearch} scenic stay`,
+      filter: "特色景观 · 拍照打卡",
+    },
   ];
   return options.map((option) => ({
     ...option,
     href: airbnbSearchUrl(option.query),
-    note: `${name} · 12人 · 6间卧室`,
+    note: `${name} · 12人 · 6卧 · 01.01-01.06`,
   }));
 }
 
@@ -704,6 +887,9 @@ const destinationSeeds = [
 
 const baseDestinations = destinationSeeds.map(makeDestination);
 let destinations = [...baseDestinations];
+let summaryExpanded = false;
+let sortMode = "heart";
+let commentsStore = {};
 let categoryOpenState = categoryGroups.reduce((state, group) => {
   state[group.id] = true;
   return state;
@@ -724,7 +910,6 @@ const drawerBackdrop = document.querySelector("#drawerBackdrop");
 const drawerContent = document.querySelector("#drawerContent");
 const modalBackdrop = document.querySelector("#modalBackdrop");
 const countdownPill = document.querySelector("#countdownPill");
-const memberRow = document.querySelector("#memberRow");
 const memberNameInput = document.querySelector("#memberNameInput");
 const joinProjectBtn = document.querySelector("#joinProjectBtn");
 const joinStatus = document.querySelector("#joinStatus");
@@ -805,6 +990,7 @@ function setJoinStatus(message = "", tone = "muted") {
 
 function applySharedState(state) {
   members = state.members || [];
+  commentsStore = state.comments || {};
   const customDestinations = (state.customDestinations || []).map((destination, index) => {
     const hasRemoteCover = String(destination.photo || "").includes("source.unsplash");
     return {
@@ -813,7 +999,7 @@ function applySharedState(state) {
         ...destination.links,
         airbnb: airbnbSearchUrl(destination.name),
       },
-      airbnbCards: buildAirbnbCards(destination.name, destination.name, destination.tabs?.stay || "优先找整套 house 或连通房，保证公共空间。"),
+      airbnbCards: buildAirbnbCards(destination.id, destination.name, destination.name, destination.tabs?.stay || "优先找整套 house 或连通房，保证公共空间。"),
       coverCaption: destination.coverCaption || "成员私藏流",
       photo:
         !destination.photo || hasRemoteCover
@@ -844,9 +1030,8 @@ function showScreen(name) {
     name = "join";
   }
   Object.values(screens).forEach((screen) => screen.classList.remove("active"));
-  screens[name].classList.add("active");
-  navItems.forEach((item) => item.classList.toggle("active", item.dataset.screen === name));
-  document.body.classList.toggle("workspace-active", name === "workspace");
+  if (screens[name]) screens[name].classList.add("active");
+  document.body.classList.remove("workspace-active");
   if (name === "workspace") renderWorkspace();
 }
 
@@ -856,9 +1041,7 @@ function syncProjectFromForm() {
 }
 
 function renderMembers() {
-  memberRow.innerHTML = members
-    .map((member) => `<span class="avatar ${member.className}" title="${member.name}" aria-label="${member.name}"></span>`)
-    .join("");
+  /* member row removed from hero; nothing to render */
 }
 
 function updateCountdown() {
@@ -876,8 +1059,11 @@ function updateCountdown() {
   const label = diff >= 0 ? "" : "已出发";
   countdownPill.innerHTML =
     `<div class="countdown-unit ${label ? "elapsed" : ""}"><strong>${days}</strong><span>${label || "天"}</span></div>` +
+    `<span class="countdown-colon">:</span>` +
     `<div class="countdown-unit"><strong>${String(hours).padStart(2, "0")}</strong><span>时</span></div>` +
+    `<span class="countdown-colon">:</span>` +
     `<div class="countdown-unit"><strong>${String(minutes).padStart(2, "0")}</strong><span>分</span></div>` +
+    `<span class="countdown-colon">:</span>` +
     `<div class="countdown-unit"><strong>${String(seconds).padStart(2, "0")}</strong><span>秒</span></div>`;
 }
 
@@ -894,6 +1080,12 @@ function compareDestinations(a, b) {
   return bStats.heart - aStats.heart || aStats.veto - bStats.veto;
 }
 
+function compareDestinationsByVeto(a, b) {
+  const aStats = voteStats(a);
+  const bStats = voteStats(b);
+  return bStats.veto - aStats.veto || aStats.heart - bStats.heart;
+}
+
 function memberName(id) {
   return members.find((member) => member.id === id)?.name || id;
 }
@@ -903,7 +1095,8 @@ function memberAvatars(ids) {
   return ids
     .map((id) => {
       const member = members.find((item) => item.id === id);
-      return `<span class="avatar tiny ${member?.className || "avatar-a"}" title="${memberName(id)}" aria-label="${memberName(id)}"></span>`;
+      const cls = member?.className || "avatar-a";
+      return `<span class="avatar tiny ${cls}" title="${memberName(id)}" aria-label="${memberName(id)}">${avatarEmojis[cls] || "😎"}</span>`;
     })
     .join("");
 }
@@ -947,13 +1140,12 @@ function groupByCategory(items) {
 
 function renderSummaryRow(destination, index) {
   const stats = voteStats(destination);
-  const medals = ["🥇 Top1", "🥈 Top2", "🥉 Top3", "Top4", "Top5"];
+  const medals = ["🥇 Top1", "🥈 Top2", "🥉 Top3", "Top4", "Top5", "Top6", "Top7", "Top8", "Top9", "Top10", "Top11", "Top12", "Top13", "Top14", "Top15", "Top16", "Top17", "Top18", "Top19", "Top20"];
   return `
     <tr>
       <td>
-        <span class="rank-badge">${medals[index]}</span>
+        <span class="rank-badge">${medals[index] || `Top${index + 1}`}</span>
         <strong>${destination.name}</strong>
-        <em>${destination.ribbon}</em>
       </td>
       <td>${destination.summary.visaTraffic}</td>
       <td>${destination.summary.strength}</td>
@@ -1013,8 +1205,7 @@ function renderDestinationCard(destination) {
 }
 
 function renderWorkspace() {
-  const sorted = [...destinations].sort(compareDestinations);
-  const groups = groupByCategory(sorted);
+  const groups = groupByCategory(destinations);
   cardsRoot.innerHTML = groups
     .map((group) => {
       const isOpen = categoryOpenState[group.id] !== false;
@@ -1037,7 +1228,21 @@ function renderWorkspace() {
       `;
     })
     .join("");
-  summaryTableBody.innerHTML = sorted.slice(0, 5).map(renderSummaryRow).join("");
+  const sorted = [...destinations].sort(sortMode === "veto" ? compareDestinationsByVeto : compareDestinations);
+  const visibleCount = summaryExpanded ? sorted.length : 5;
+  summaryTableBody.innerHTML = sorted.slice(0, visibleCount).map(renderSummaryRow).join("");
+  const toggleBtn = document.querySelector("#toggleSummaryAll");
+  if (toggleBtn) {
+    const arrow = toggleBtn.querySelector(".expand-arrow");
+    if (summaryExpanded) {
+      toggleBtn.childNodes[0].textContent = "收起 ";
+      if (arrow) arrow.classList.add("up");
+    } else {
+      toggleBtn.childNodes[0].textContent = `展开全部 (${sorted.length - 5}) `;
+      if (arrow) arrow.classList.remove("up");
+    }
+    toggleBtn.style.display = sorted.length > 5 ? "" : "none";
+  }
   syncProjectFromForm();
 }
 
@@ -1088,21 +1293,68 @@ function renderAirbnbCards(destination) {
         .map(
           (card, index) => `
             <a class="airbnb-card" href="${card.href}" target="_blank" rel="noreferrer">
-              <strong>${card.title}</strong>
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <strong>🏡 ${card.title}</strong>
+                <span class="airbnb-tag">${card.tag}</span>
+              </div>
               <span>${card.meta}</span>
-              <em>${card.note} · 搜索 ${index + 1}</em>
+              <em>${card.filter}</em>
+              <small>${card.note}</small>
             </a>
           `,
         )
         .join("")}
     </div>
-    <p class="resource-note">这里是 Airbnb 搜索入口卡片，不伪造实时房源名称和价格；正式使用前需要打开链接核验日期、人数和可订状态。</p>
+    <p class="resource-note">点击卡片跳转 Airbnb 真实房源页面，可直接查看房源详情、图片和价格。</p>
   `;
+}
+
+function timeAgo(timestamp) {
+  if (!timestamp) return "";
+  const diff = Math.floor(Date.now() / 1000) - timestamp;
+  if (diff < 60) return "刚刚";
+  if (diff < 3600) return `${Math.floor(diff / 60)} 分钟前`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)} 小时前`;
+  return `${Math.floor(diff / 86400)} 天前`;
+}
+
+function renderCommentSection(destinationId) {
+  const list = commentsStore[destinationId] || [];
+  const bgColors = {
+    "avatar-a": "#5b8dee", "avatar-b": "#e87ab5", "avatar-c": "#f5a623",
+    "avatar-d": "#9b59b6", "avatar-e": "#27ae60", "avatar-f": "#e67e22",
+    "avatar-g": "#2ecc71", "avatar-h": "#3498db", "avatar-i": "#e74c3c",
+    "avatar-j": "#1abc9c",
+  };
+  const items = list.length
+    ? list.map((c) => {
+        const bg = bgColors[c.memberClass] || "#5b8dee";
+        const emoji = avatarEmojis[c.memberClass] || "😎";
+        return `
+          <div class="comment-item">
+            <div class="comment-avatar" style="background:${bg}">${emoji}</div>
+            <div class="comment-body">
+              <div class="comment-meta"><strong>${c.memberName}</strong><time>${timeAgo(c.createdAt)}</time></div>
+              <div class="comment-text">${c.text}</div>
+            </div>
+          </div>`;
+      }).join("")
+    : `<div class="comment-empty">还没有评论，来说两句吧</div>`;
+  return `
+    <section class="detail-section comment-section">
+      <h2>💬 讨论区 (${list.length})</h2>
+      <div class="comment-list">${items}</div>
+      <div class="comment-input-row">
+        <input type="text" id="commentInput" placeholder="说说你的想法..." maxlength="200" />
+        <button class="comment-send-btn" data-action="send-comment" data-destination="${destinationId}">发送</button>
+      </div>
+    </section>`;
 }
 
 function openDrawer(destinationId) {
   const destination = destinations.find((item) => item.id === destinationId);
   if (!destination) return;
+  const stats = voteStats(destination);
   drawerContent.innerHTML = `
     <div class="drawer-hero" style="--photo: ${destination.photo}">
       ${destination.ribbon ? `<span class="recommend-ribbon in-hero">${destination.ribbon}</span>` : ""}
@@ -1112,47 +1364,53 @@ function openDrawer(destinationId) {
         <span>${destination.headline}</span>
       </div>
     </div>
+    <div class="drawer-quick-stats">
+      <span>🗳 投票 ${stats.heart} 支持 · ${stats.veto} 否决</span>
+      <span>✈️ ${destination.flight}</span>
+    </div>
     <section class="detail-section analysis-section">
-      <h2>适配分析</h2>
+      <h2>🎯 适配分析</h2>
       <p>${destination.analysis}</p>
     </section>
     <section class="detail-section split">
       <div>
-        <h2>优势 Summary</h2>
+        <h2>✅ 优势</h2>
         <ul>${destination.pros.map((item) => `<li>${item}</li>`).join("")}</ul>
       </div>
       <div>
-        <h2>局限性 Summary</h2>
+        <h2>⚠️ 局限性</h2>
         <ul>${destination.cons.map((item) => `<li>${item}</li>`).join("")}</ul>
       </div>
     </section>
-    ${renderDetailSection("行 | 签证交通", destination.tabs.move)}
+    ${renderDetailSection("🚗 行 | 签证交通", destination.tabs.move)}
     ${renderDetailSection(
-      "住 | 住宿方案",
+      "🏠 住 | 住宿方案",
       destination.tabs.stay,
       renderAirbnbCards(destination),
     )}
     ${renderDetailSection(
-      "吃 | 推荐线索",
+      "🍜 吃 | 推荐线索",
       destination.tabs.eat,
-      `<div class="resource-pair"><a class="resource-link" href="${destination.links.foodPost}" target="_blank" rel="noreferrer">查看小红书推荐</a><span>${destination.links.foodAddress}</span></div>`,
+      `<div class="resource-pair"><a class="resource-link" href="${destination.links.foodPost}" target="_blank" rel="noreferrer">📕 小红书推荐</a><span>${destination.links.foodAddress}</span></div>`,
     )}
     <section class="detail-section">
-      <h2>玩 | By day 出行计划</h2>
+      <h2>🎮 玩 | 出行计划</h2>
       <p>${destination.tabs.play}</p>
       ${renderPlanTabs(destination)}
     </section>
     <section class="detail-section">
-      <h2>投票明细</h2>
+      <h2>🗳 投票明细</h2>
       <div class="vote-members">
-        ${voteMemberRow(destination, "heart", "投票")}
-        ${voteMemberRow(destination, "veto", "否决")}
+        ${voteMemberRow(destination, "heart", "✅ 支持")}
+        ${voteMemberRow(destination, "veto", "❌ 否决")}
       </div>
     </section>
+    ${renderCommentSection(destination.id)}
   `;
   drawerBackdrop.hidden = false;
   drawer.classList.add("open");
   drawer.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
 }
 
 function renderDayPanel(destinationId, dayIndex) {
@@ -1171,6 +1429,7 @@ function closeDrawer() {
   drawerBackdrop.hidden = true;
   drawer.classList.remove("open");
   drawer.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
 }
 
 function openModal() {
@@ -1217,7 +1476,7 @@ async function addDestination() {
       foodPost: `https://www.xiaohongshu.com/search_result?keyword=${encodeURIComponent(`${name} 美食 攻略`)}`,
       foodAddress: "待补充店铺地址",
     },
-    airbnbCards: buildAirbnbCards(name, name, "优先找整套 house 或连通房，保证公共空间。"),
+    airbnbCards: buildAirbnbCards(id, name, name, "优先找整套 house 或连通房，保证公共空间。"),
     votes: { heart: [currentMemberId], veto: [] },
     comments: [{ member: member?.name || "成员", text: reason }],
     pros: ["成员真实推荐，讨论价值高。", "可以按团队偏好继续细化。"],
@@ -1242,8 +1501,18 @@ async function addDestination() {
   renderWorkspace();
 }
 
-navItems.forEach((item) => {
-  item.addEventListener("click", () => showScreen(item.dataset.screen));
+document.querySelector("#toggleSummaryAll").addEventListener("click", () => {
+  summaryExpanded = !summaryExpanded;
+  renderWorkspace();
+});
+
+document.querySelectorAll(".sort-toggle").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    sortMode = btn.dataset.sort;
+    document.querySelectorAll(".sort-toggle").forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+    renderWorkspace();
+  });
 });
 
 document.querySelector("#createProjectBtn").addEventListener("click", () => {
@@ -1317,9 +1586,44 @@ cardsRoot.addEventListener("click", (event) => {
 
 drawer.addEventListener("click", (event) => {
   const button = event.target.closest("[data-action='day-tab']");
-  if (!button) return;
-  renderDayPanel(button.dataset.destination, Number(button.dataset.day));
+  if (button) {
+    renderDayPanel(button.dataset.destination, Number(button.dataset.day));
+    return;
+  }
+  const sendBtn = event.target.closest("[data-action='send-comment']");
+  if (sendBtn) {
+    sendComment(sendBtn.dataset.destination);
+  }
 });
+
+drawer.addEventListener("keyup", (event) => {
+  if (event.key === "Enter" && event.target.id === "commentInput") {
+    const destId = event.target.closest(".comment-section")?.querySelector("[data-action='send-comment']")?.dataset.destination;
+    if (destId) sendComment(destId);
+  }
+});
+
+async function sendComment(destinationId) {
+  if (!currentMember()) { showScreen("join"); return; }
+  const input = document.querySelector("#commentInput");
+  const text = input?.value?.trim();
+  if (!text) return;
+  input.value = "";
+  try {
+    const state = await api("/api/comment", {
+      method: "POST",
+      body: JSON.stringify({ destinationId, memberId: currentMemberId, text }),
+    });
+    applySharedState(state);
+    // Re-render comment section in drawer without full re-render
+    const section = drawerContent.querySelector(".comment-section");
+    if (section) {
+      section.outerHTML = renderCommentSection(destinationId);
+    }
+  } catch (error) {
+    console.error("Comment failed:", error);
+  }
+}
 
 document.querySelector("#openAddDestination").addEventListener("click", openModal);
 document.querySelector("#closeModal").addEventListener("click", closeModal);
@@ -1342,7 +1646,7 @@ document.querySelectorAll(".segmented button, .tag-cloud button").forEach((butto
 });
 
 async function initApp() {
-  shareLinkText.textContent = window.location.href;
+  if (shareLinkText) shareLinkText.textContent = window.location.href;
   await refreshSharedState();
   if (currentMember()) {
     showScreen("workspace");
