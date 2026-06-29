@@ -2,6 +2,78 @@ let members = [];
 
 let currentMemberId = localStorage.getItem("tripvote-member-id");
 let apiMode = null;
+const LOCAL_STORAGE_KEY = "tripvote-local-state";
+
+function readLocalState() {
+  try {
+    const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (!raw) return { members: [], votes: {}, customDestinations: [] };
+    const state = JSON.parse(raw);
+    state.members = state.members || [];
+    state.votes = state.votes || {};
+    state.customDestinations = state.customDestinations || [];
+    return state;
+  } catch {
+    return { members: [], votes: {}, customDestinations: [] };
+  }
+}
+
+function writeLocalState(state) {
+  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state));
+}
+
+function localApi(path, options = {}) {
+  const action = path.replace(/^\/api\//, "");
+  const body = options.body ? JSON.parse(options.body) : {};
+  const state = readLocalState();
+
+  if (action === "health") return { ok: true };
+  if (action === "state") return { members: state.members, votes: state.votes, customDestinations: state.customDestinations };
+
+  if (action === "member") {
+    const name = String(body.name || "").trim();
+    const className = String(body.className || "avatar-a").trim() || "avatar-a";
+    if (!name) throw new Error("name required");
+    const member = {
+      id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
+      name,
+      className,
+      joinedAt: Math.floor(Date.now() / 1000),
+    };
+    state.members.push(member);
+    writeLocalState(state);
+    return { members: state.members, votes: state.votes, customDestinations: state.customDestinations, currentMemberId: member.id };
+  }
+
+  if (action === "vote") {
+    const { memberId, destinationId, voteType } = body;
+    if (!["heart", "veto"].includes(voteType) || !memberId || !destinationId) throw new Error("invalid vote");
+    const votes = state.votes[destinationId] || { heart: [], veto: [] };
+    votes.heart = (votes.heart || []).filter((id) => id !== memberId);
+    votes.veto = (votes.veto || []).filter((id) => id !== memberId);
+    if (!votes[voteType]?.includes?.(memberId) || !(votes.heart.includes(memberId) || votes.veto.includes(memberId))) {
+      votes[voteType] = votes[voteType] || [];
+      if (!votes[voteType].includes(memberId)) votes[voteType].push(memberId);
+    }
+    state.votes[destinationId] = votes;
+    writeLocalState(state);
+    return { members: state.members, votes: state.votes, customDestinations: state.customDestinations };
+  }
+
+  if (action === "destination") {
+    const { memberId, destination } = body;
+    const destinationId = String(destination?.id || "");
+    if (!memberId || !destinationId) throw new Error("invalid destination");
+    state.customDestinations = state.customDestinations.filter((d) => d.id !== destinationId);
+    state.customDestinations.unshift(destination);
+    state.votes[destinationId] = destination.votes || { heart: [memberId], veto: [] };
+    writeLocalState(state);
+    return { members: state.members, votes: state.votes, customDestinations: state.customDestinations };
+  }
+
+  throw new Error(`unknown local action: ${action}`);
+}
+
 let project = {
   title: "福赛斯元旦5天 Happy 计划",
   travelStartDate: "2027-01-01",
@@ -685,6 +757,8 @@ async function api(path, options = {}) {
     return response.json();
   }
 
+  if (apiMode === "local") return localApi(path, options);
+
   const cloudEndpoint = path;
   const cgiEndpoint = `/cgi-bin/api.py?action=${path.slice(5)}`;
   const endpoints =
@@ -692,7 +766,7 @@ async function api(path, options = {}) {
   let lastError;
   for (const endpoint of endpoints) {
     const controller = new AbortController();
-    const timeout = window.setTimeout(() => controller.abort(), 12000);
+    const timeout = window.setTimeout(() => controller.abort(), 8000);
     try {
       const response = await fetch(endpoint, {
         headers: { "Content-Type": "application/json" },
@@ -713,7 +787,15 @@ async function api(path, options = {}) {
       window.clearTimeout(timeout);
     }
   }
-  throw lastError || new Error(`API ${path} failed`);
+
+  // Fallback to localStorage when no server is reachable
+  try {
+    const result = localApi(path, options);
+    apiMode = "local";
+    return result;
+  } catch {
+    throw lastError || new Error(`API ${path} failed`);
+  }
 }
 
 function setJoinStatus(message = "", tone = "muted") {
