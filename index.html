@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>团队出行规划器原型</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="side-nav" aria-label="原型页面">
+        <div class="brand">
+          <div class="brand-mark">T</div>
+          <div>
+            <strong>TripVote</strong>
+            <span>团队出行规划器</span>
+          </div>
+        </div>
+        <nav class="nav-list">
+          <button class="nav-item active" data-screen="create">创建项目</button>
+          <button class="nav-item" data-screen="join">成员加入</button>
+          <button class="nav-item" data-screen="workspace">协作主页</button>
+        </nav>
+        <div class="share-box">
+          <span>项目链接</span>
+          <strong id="shareLinkText">加载中...</strong>
+          <button class="ghost-button small">复制</button>
+        </div>
+      </aside>
+
+      <main class="main-stage">
+        <section class="screen active" id="screen-create" aria-labelledby="create-title">
+          <div class="screen-header">
+            <div>
+              <p class="eyebrow">创建出行项目</p>
+              <h1 id="create-title">福赛斯元旦5天 Happy 计划</h1>
+            </div>
+            <button class="primary-button" id="createProjectBtn">生成推荐</button>
+          </div>
+
+          <div class="create-layout">
+            <form class="project-form">
+              <label>
+                <span>项目名称</span>
+                <input value="福赛斯元旦5天 Happy 计划" />
+              </label>
+              <div class="form-grid">
+                <label>
+                  <span>出行时间</span>
+                  <input id="travelStartDate" type="date" value="2027-01-01" />
+                </label>
+                <label>
+                  <span>出发城市（可选）</span>
+                  <input value="上海" />
+                </label>
+                <label>
+                  <span>团队人数</span>
+                  <input value="8 人" />
+                </label>
+                <label>
+                  <span>出行天数</span>
+                  <input value="5 天" />
+                </label>
+                <label>
+                  <span>人均预算（可选）</span>
+                  <input value="3000-5000 元" />
+                </label>
+              </div>
+
+              <label>
+                <span>项目目标 / 中心思想</span>
+                <textarea id="projectGoal">找一个大家都愿意参与、住宿空间舒服、吃玩都能兼顾的 5 天 Happy 旅行目的地。</textarea>
+              </label>
+
+              <fieldset>
+                <legend>出行类型</legend>
+                <div class="segmented">
+                  <button type="button" class="selected">国内</button>
+                  <button type="button">出国</button>
+                  <button type="button">周边</button>
+                  <button type="button">团建</button>
+                </div>
+              </fieldset>
+
+              <fieldset>
+                <legend>偏好标签</legend>
+                <div class="tag-cloud">
+                  <button type="button" class="selected">轻松</button>
+                  <button type="button" class="selected">美食</button>
+                  <button type="button" class="selected">自然</button>
+                  <button type="button">海岛</button>
+                  <button type="button">文化</button>
+                  <button type="button">温泉</button>
+                  <button type="button">购物</button>
+                </div>
+              </fieldset>
+
+              <label>
+                <span>限制条件</span>
+                <textarea>不想太赶，交通尽量方便，不安排太多早起行程。</textarea>
+              </label>
+            </form>
+
+            <aside class="preview-panel">
+              <div class="mini-map">
+                <span>上海</span>
+                <i></i>
+                <span>候选目的地</span>
+              </div>
+              <div class="preview-stack">
+                <article>
+                  <strong>已导入 19 个候选目的地</strong>
+                  <span>每个围绕优劣势、行、住、吃、玩生成可讨论版本</span>
+                </article>
+                <article>
+                  <strong>分享给成员后投票</strong>
+                  <span>统计每个人的选择，不做额外权重</span>
+                </article>
+                <article>
+                  <strong>成员可追加目的地</strong>
+                  <span>新增后生成同规格方案</span>
+                </article>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="screen" id="screen-generate" aria-labelledby="generate-title">
+          <div class="generate-card">
+            <div class="pulse-ring"></div>
+            <p class="eyebrow">正在生成</p>
+            <h1 id="generate-title">匹配团队出行方案</h1>
+            <div class="progress-lines">
+              <span style="--w: 92%">候选目的地池</span>
+              <span style="--w: 74%">住宿与聚会空间</span>
+              <span style="--w: 86%">行住吃玩摘要</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen" id="screen-join" aria-labelledby="join-title">
+          <div class="join-wrap">
+            <article class="join-card">
+              <p class="eyebrow">加入项目</p>
+              <h1 id="join-title">福赛斯元旦5天 Happy 计划</h1>
+              <label>
+                <span>你的昵称</span>
+                <input id="memberNameInput" value="" placeholder="输入你的名字" />
+              </label>
+              <div class="avatar-picker" aria-label="选择头像">
+                <button class="avatar avatar-a selected" data-avatar="avatar-a" aria-label="头像 A"></button>
+                <button class="avatar avatar-b" data-avatar="avatar-b" aria-label="头像 B"></button>
+                <button class="avatar avatar-c" data-avatar="avatar-c" aria-label="头像 C"></button>
+                <button class="avatar avatar-d" data-avatar="avatar-d" aria-label="头像 D"></button>
+                <button class="avatar avatar-e" data-avatar="avatar-e" aria-label="头像 E"></button>
+              </div>
+              <button class="primary-button full-width" id="joinProjectBtn">进入项目</button>
+            </article>
+          </div>
+        </section>
+
+        <section class="screen" id="screen-workspace" aria-labelledby="workspace-title">
+          <header class="happy-top">
+            <div class="token-notice">⚠ 严正声明：以下为有限Token下的简易版网页示意，坚决不代表本人的产品标准及设计理念</div>
+            <section class="happy-hero" aria-label="项目倒计时">
+              <div class="top-actions hero-actions">
+                <div class="member-row" id="memberRow" aria-label="成员列表"></div>
+                <button class="ghost-button">分享</button>
+              </div>
+              <h1 id="workspace-title">福赛斯 2027 年元旦 5天 Happy 计划</h1>
+              <div class="countdown-board" id="countdownPill" aria-live="polite"></div>
+            </section>
+            <div class="core-slogan">🚩 核心嫖想：xdm，最重要的就是一起吹牛逼happy！无论如何都要住在一起！</div>
+          </header>
+
+          <section class="summary-table-card" aria-label="目的地投票摘要">
+            <div class="summary-table-head">
+              <div>
+                <p class="eyebrow">团队体感总览</p>
+                <h2>Top5 目的地 Summary + 投票结果</h2>
+              </div>
+              <span>按当前投票排序</span>
+            </div>
+            <div class="summary-table-wrap">
+              <table class="summary-table">
+                <thead>
+                  <tr>
+                    <th>目的地 / 推荐人</th>
+                    <th>签证与交通</th>
+                    <th>核心优势</th>
+                    <th>目的地局限性</th>
+                    <th>投票人</th>
+                    <th>投票结果</th>
+                  </tr>
+                </thead>
+                <tbody id="summaryTableBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="destination-list" aria-label="目的地列表">
+            <div class="list-toolbar">
+              <h2>候选目的地</h2>
+              <button class="primary-button" id="openAddDestination">新增目的地</button>
+            </div>
+            <div id="destinationCards"></div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <div class="drawer-backdrop" id="drawerBackdrop" hidden></div>
+    <aside class="detail-drawer" id="detailDrawer" aria-hidden="true">
+      <button class="icon-button close-drawer" id="closeDrawer" aria-label="关闭">×</button>
+      <div id="drawerContent"></div>
+    </aside>
+
+    <div class="modal-backdrop" id="modalBackdrop" hidden>
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="add-title">
+        <button class="icon-button close-modal" id="closeModal" aria-label="关闭">×</button>
+        <p class="eyebrow">追加目的地</p>
+        <h1 id="add-title">新增一个候选方案</h1>
+        <label>
+          <span>目的地</span>
+          <input id="newDestinationName" value="清迈" />
+        </label>
+        <label>
+          <span>补充理由</span>
+          <textarea id="newDestinationReason">想要更轻松，预算也低一些。</textarea>
+        </label>
+        <button class="primary-button full-width" id="addDestinationBtn">生成并加入</button>
+      </section>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

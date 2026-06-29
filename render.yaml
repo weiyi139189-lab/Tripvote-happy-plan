@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: tripvote-happy-plan
+    runtime: python
+    plan: starter
+    autoDeploy: true
+    buildCommand: ""
+    startCommand: python3 collab_server.py
+    healthCheckPath: /api/health
+    envVars:
+      - key: TRIPVOTE_STATE_FILE
+        value: /data/collab-state.json
+    disk:
+      name: tripvote-data
+      mountPath: /data
+      sizeGB: 1
