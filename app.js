@@ -1193,9 +1193,10 @@ function updateCountdown() {
 }
 
 function voteStats(destination) {
+  const v = destination.votes || { heart: [], veto: [] };
   return {
-    heart: destination.votes.heart.length,
-    veto: destination.votes.veto.length,
+    heart: (v.heart || []).length,
+    veto: (v.veto || []).length,
   };
 }
 
@@ -1227,7 +1228,8 @@ function memberAvatars(ids) {
 }
 
 function allVoters(destination) {
-  return [...new Set([...destination.votes.heart, ...destination.votes.veto])];
+  const v = destination.votes || { heart: [], veto: [] };
+  return [...new Set([...(v.heart || []), ...(v.veto || [])])];
 }
 
 async function setVote(destinationId, voteType) {
@@ -1244,12 +1246,13 @@ async function setVote(destinationId, voteType) {
 }
 
 function renderVoteButton(destination, voteType, symbol, label) {
-  const active = destination.votes[voteType].includes(currentMemberId);
+  const v = destination.votes || { heart: [], veto: [] };
+  const active = (v[voteType] || []).includes(currentMemberId);
   return `
     <button class="vote-button ${active ? "active" : ""}" data-action="vote" data-destination="${destination.id}" data-vote="${voteType}">
       <span class="vote-symbol">${symbol}</span>
       <span>${label}</span>
-      <span class="vote-count">${destination.votes[voteType].length}</span>
+      <span class="vote-count">${(v[voteType] || []).length}</span>
     </button>
   `;
 }
@@ -1372,7 +1375,8 @@ function renderWorkspace() {
 }
 
 function voteMemberRow(destination, voteType, label) {
-  const ids = destination.votes[voteType];
+  const v = destination.votes || { heart: [], veto: [] };
+  const ids = v[voteType] || [];
   return `
     <article>
       <strong>${label}：${ids.length}</strong>
