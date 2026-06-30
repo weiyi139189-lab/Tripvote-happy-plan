@@ -1190,37 +1190,36 @@ button.avatar {
 }
 
 .summary-table td:first-child {
-  width: 210px;
-}
-
-.summary-table td:first-child strong,
-.summary-table td:first-child span,
-.summary-table td:first-child em {
-  display: block;
+  white-space: nowrap;
 }
 
 .summary-table td:first-child strong {
-  margin-bottom: 6px;
+  display: inline;
+  margin-bottom: 0;
+  margin-left: 6px;
   color: var(--text);
-  font-size: 18px;
+  font-size: 16px;
 }
 
-.summary-table td:first-child span {
-  color: var(--teal);
-  font-weight: 800;
-}
-
-.summary-table .rank-badge {
+.summary-table td:first-child span.rank-badge {
   display: inline-flex;
   width: fit-content;
-  margin-bottom: 8px;
-  padding: 4px 8px;
+  padding: 3px 8px;
   border: 1px solid rgba(29, 147, 143, 0.3);
   border-radius: 8px;
   color: var(--teal);
   background: rgba(29, 147, 143, 0.08);
   font-size: 12px;
   font-weight: 950;
+}
+
+.summary-table td:first-child em {
+  display: block;
+  margin-top: 7px;
+  color: var(--teal);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 900;
 }
 
 .budget-tag {
