@@ -220,6 +220,15 @@
       </section>
     </div>
 
+    <div class="voter-sidebar-backdrop" id="voterSidebarBackdrop" hidden></div>
+    <aside class="voter-sidebar" id="voterSidebar" aria-hidden="true">
+      <div class="voter-sidebar-header">
+        <h3 id="voterSidebarTitle">投票明细</h3>
+        <button class="icon-button" id="closeVoterSidebar" aria-label="关闭">×</button>
+      </div>
+      <div id="voterSidebarContent"></div>
+    </aside>
+
     <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.0/firebase-app-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.0/firebase-database-compat.js"></script>
     <script>

@@ -976,12 +976,13 @@ button.avatar {
 }
 
 .countdown-unit {
-  width: 68px;
+  min-width: 68px;
+  width: auto;
+  padding: 6px 14px;
   min-height: 60px;
   display: grid;
   place-items: center;
   align-content: center;
-  padding: 6px;
   border-radius: 8px;
   color: #ffffff;
   background: rgba(255, 255, 255, 0.16);
@@ -1683,6 +1684,23 @@ button.avatar {
   color: var(--muted);
 }
 
+.airbnb-search-all {
+  display: block;
+  margin: 12px 0 4px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #ff385c, #e31c5f);
+  color: #fff;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  transition: opacity .15s;
+}
+.airbnb-search-all:hover {
+  opacity: .88;
+}
+
 .detail-section p,
 .detail-section li {
   color: var(--muted);
@@ -1925,4 +1943,113 @@ button.avatar {
     height: 92vh;
     border-radius: 16px 16px 0 0;
   }
+}
+
+/* ── Voter Detail Sidebar ── */
+.voter-detail-trigger {
+  background: none;
+  border: 1px solid rgba(0,0,0,.12);
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-size: 13px;
+  color: #555;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+  line-height: 1;
+}
+.voter-detail-trigger:hover {
+  background: #f0f0f0;
+  color: #222;
+}
+
+.voter-sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.25);
+  z-index: 900;
+}
+.voter-sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 340px;
+  max-width: 90vw;
+  height: 100vh;
+  background: #fff;
+  z-index: 910;
+  box-shadow: -4px 0 24px rgba(0,0,0,.12);
+  transform: translateX(100%);
+  transition: transform .25s ease;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.voter-sidebar.open {
+  transform: translateX(0);
+}
+.voter-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 20px 12px;
+  border-bottom: 1px solid #eee;
+}
+.voter-sidebar-header h3 {
+  margin: 0;
+  font-size: 18px;
+}
+.voter-sidebar-section {
+  padding: 16px 20px;
+}
+.voter-sidebar-section h4 {
+  margin: 0 0 10px;
+  font-size: 14px;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.voter-sidebar-section h4 .badge {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.voter-sidebar-section h4 .badge.heart {
+  background: #fef2f2;
+  color: #dc2626;
+}
+.voter-sidebar-section h4 .badge.veto {
+  background: #f5f5f5;
+  color: #666;
+}
+.voter-list-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+.voter-list-item:last-child {
+  border-bottom: none;
+}
+.voter-list-item .voter-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  background: #f0f4ff;
+  flex-shrink: 0;
+}
+.voter-list-item .voter-name {
+  font-size: 14px;
+  font-weight: 500;
+}
+.voter-empty {
+  color: #999;
+  font-size: 13px;
+  padding: 8px 0;
 }

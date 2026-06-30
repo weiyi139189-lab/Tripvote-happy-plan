@@ -336,25 +336,25 @@ const coverQueries = {
 };
 
 const photoUrls = {
-  phuket: "https://images.unsplash.com/photo-1589394815804-964ed0e2eb5b?w=600&h=400&fit=crop",
-  danang: "https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?w=600&h=400&fit=crop",
-  jeju: "https://images.unsplash.com/photo-1578752237507-28d47b81e0a7?w=600&h=400&fit=crop",
-  okinawa: "https://images.unsplash.com/photo-1573551089778-46a7abc39d9b?w=600&h=400&fit=crop",
-  "kota-kinabalu": "https://images.unsplash.com/photo-1580713364819-2da71e30e5e0?w=600&h=400&fit=crop",
-  harbin: "https://images.unsplash.com/photo-1551918120-9719aa4a3974?w=600&h=400&fit=crop",
-  bali: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=600&h=400&fit=crop",
-  "luang-prabang": "https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=600&h=400&fit=crop",
-  kathmandu: "https://images.unsplash.com/photo-1558862234-5ee7a4f4a0c9?w=600&h=400&fit=crop",
-  "sri-lanka": "https://images.unsplash.com/photo-1586523969823-ba44e7e46e1c?w=600&h=400&fit=crop",
-  ulaanbaatar: "https://images.unsplash.com/photo-1577748999869-52a0736b9575?w=600&h=400&fit=crop",
-  altay: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=600&h=400&fit=crop",
-  sapporo: "https://images.unsplash.com/photo-1578637387939-43c525550085?w=600&h=400&fit=crop",
-  jiangxi: "https://images.unsplash.com/photo-1528164344705-47542687000d?w=600&h=400&fit=crop",
-  guangxi: "https://images.unsplash.com/photo-1529921879218-f99546d05220?w=600&h=400&fit=crop",
-  "nanning-fangchenggang": "https://images.unsplash.com/photo-1537531383496-f4749b57aae6?w=600&h=400&fit=crop",
-  "hanoi-ho-chi-minh": "https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=600&h=400&fit=crop",
-  bangkok: "https://images.unsplash.com/photo-1508009603885-50cf7c579365?w=600&h=400&fit=crop",
-  "ha-long-bay": "https://images.unsplash.com/photo-1528127269322-539801943592?w=600&h=400&fit=crop",
+  phuket: "./images/phuket.jpg",
+  danang: "./images/danang.jpg",
+  jeju: "./images/jeju.jpg",
+  okinawa: "./images/okinawa.jpg",
+  "kota-kinabalu": "./images/kota-kinabalu.jpg",
+  harbin: "./images/harbin.jpg",
+  bali: "./images/bali.jpg",
+  "luang-prabang": "./images/luang-prabang.jpg",
+  kathmandu: "./images/kathmandu.jpg",
+  "sri-lanka": "./images/sri-lanka.jpg",
+  ulaanbaatar: "./images/ulaanbaatar.jpg",
+  altay: "./images/altay.jpg",
+  sapporo: "./images/sapporo.jpg",
+  jiangxi: "./images/jiangxi.jpg",
+  guangxi: "./images/guangxi.jpg",
+  "nanning-fangchenggang": "./images/nanning-fangchenggang.jpg",
+  "hanoi-ho-chi-minh": "./images/hanoi-ho-chi-minh.jpg",
+  bangkok: "./images/bangkok.jpg",
+  "ha-long-bay": "./images/ha-long-bay.jpg",
 };
 
 const analysisByDestination = {
@@ -1269,6 +1269,7 @@ function groupByCategory(items) {
 function renderSummaryRow(destination, index) {
   const stats = voteStats(destination);
   const medals = ["🥇 Top1", "🥈 Top2", "🥉 Top3", "Top4", "Top5", "Top6", "Top7", "Top8", "Top9", "Top10", "Top11", "Top12", "Top13", "Top14", "Top15", "Top16", "Top17", "Top18", "Top19", "Top20"];
+  const voterCount = allVoters(destination).length;
   return `
     <tr>
       <td>
@@ -1278,7 +1279,12 @@ function renderSummaryRow(destination, index) {
       <td>${destination.summary.visaTraffic}</td>
       <td>${destination.summary.strength}</td>
       <td>${destination.summary.limitation}</td>
-      <td><div class="summary-voters">${memberAvatars(allVoters(destination))}</div></td>
+      <td>
+        <div class="summary-voters" style="display:flex;align-items:center;gap:6px;">
+          ${memberAvatars(allVoters(destination))}
+          ${voterCount > 0 ? `<button class="voter-detail-trigger" data-action="voter-detail" data-destination="${destination.id}" title="查看投票明细">▸</button>` : ""}
+        </div>
+      </td>
       <td>
         <div class="summary-votes">
           <span>♥ ${stats.heart}</span>
@@ -1434,7 +1440,10 @@ function renderAirbnbCards(destination) {
         )
         .join("")}
     </div>
-    <p class="resource-note">点击卡片跳转 Airbnb 真实房源页面，可直接查看房源详情、图片和价格。</p>
+    <a class="airbnb-search-all" href="${destination.links?.airbnb || airbnbSearchUrl(destination.name)}" target="_blank" rel="noreferrer">
+      🔍 在 Airbnb 搜索「${destination.name}」更多房源（已预设12人·6卧·01.01-01.06）
+    </a>
+    <p class="resource-note">上方卡片为推荐房型，如失效可点击上方链接查看完整搜索结果。</p>
   `;
 }
 
@@ -1697,6 +1706,63 @@ memberNameInput.addEventListener("keydown", (event) => {
     event.preventDefault();
     joinProjectBtn.click();
   }
+});
+
+// ── Voter Detail Sidebar ──
+const voterSidebar = document.querySelector("#voterSidebar");
+const voterSidebarBackdrop = document.querySelector("#voterSidebarBackdrop");
+const voterSidebarTitle = document.querySelector("#voterSidebarTitle");
+const voterSidebarContent = document.querySelector("#voterSidebarContent");
+
+function openVoterSidebar(destinationId) {
+  const dest = destinations.find((d) => d.id === destinationId);
+  if (!dest) return;
+  const v = dest.votes || { heart: [], veto: [] };
+  const heartMembers = (v.heart || []).map((id) => members.find((m) => m.id === id)).filter(Boolean);
+  const vetoMembers = (v.veto || []).map((id) => members.find((m) => m.id === id)).filter(Boolean);
+
+  voterSidebarTitle.textContent = `${dest.name} · 投票明细`;
+
+  const avatarEmoji = { "avatar-a": "😎", "avatar-b": "🤗", "avatar-c": "🦊", "avatar-d": "🐱", "avatar-e": "🐼", "avatar-f": "🦁", "avatar-g": "🐸", "avatar-h": "🦉", "avatar-i": "🐯", "avatar-j": "🐧" };
+
+  function renderVoterList(list) {
+    if (!list.length) return `<p class="voter-empty">暂无</p>`;
+    return list.map((m) => `
+      <div class="voter-list-item">
+        <div class="voter-avatar">${avatarEmoji[m.className] || "😎"}</div>
+        <span class="voter-name">${m.name}</span>
+      </div>
+    `).join("");
+  }
+
+  voterSidebarContent.innerHTML = `
+    <div class="voter-sidebar-section">
+      <h4>♥ 支持 <span class="badge heart">${heartMembers.length}</span></h4>
+      ${renderVoterList(heartMembers)}
+    </div>
+    <div class="voter-sidebar-section">
+      <h4>× 否决 <span class="badge veto">${vetoMembers.length}</span></h4>
+      ${renderVoterList(vetoMembers)}
+    </div>
+  `;
+
+  voterSidebar.classList.add("open");
+  voterSidebar.setAttribute("aria-hidden", "false");
+  voterSidebarBackdrop.hidden = false;
+}
+
+function closeVoterSidebar() {
+  voterSidebar.classList.remove("open");
+  voterSidebar.setAttribute("aria-hidden", "true");
+  voterSidebarBackdrop.hidden = true;
+}
+
+document.querySelector("#closeVoterSidebar").addEventListener("click", closeVoterSidebar);
+voterSidebarBackdrop.addEventListener("click", closeVoterSidebar);
+
+summaryTableBody.addEventListener("click", (event) => {
+  const trigger = event.target.closest("[data-action='voter-detail']");
+  if (trigger) openVoterSidebar(trigger.dataset.destination);
 });
 
 cardsRoot.addEventListener("click", (event) => {
