@@ -106,6 +106,128 @@ function localApi(path, options = {}) {
   throw new Error(`unknown local action: ${action}`);
 }
 
+// ---------- Firebase Realtime Database API ----------
+const _fbDb = typeof firebase !== "undefined" ? firebase.database() : null;
+
+function _fbObjectToArray(obj) {
+  if (!obj || typeof obj !== "object") return [];
+  return Object.values(obj);
+}
+
+function _fbMergeState(snapshot) {
+  const data = snapshot.val() || {};
+  return {
+    members: _fbObjectToArray(data.members),
+    votes: data.votes || {},
+    customDestinations: _fbObjectToArray(data.customDestinations),
+    comments: {},
+    _rawComments: data.comments || {},
+  };
+}
+
+function _fbFinalizeState(data) {
+  const comments = {};
+  for (const [destId, commentsObj] of Object.entries(data._rawComments || {})) {
+    comments[destId] = _fbObjectToArray(commentsObj);
+  }
+  data.comments = comments;
+  delete data._rawComments;
+  return {
+    members: data.members,
+    votes: data.votes,
+    customDestinations: data.customDestinations,
+    comments: data.comments,
+  };
+}
+
+async function firebaseApi(path, options = {}) {
+  const action = path.replace(/^\/api\//, "");
+  const body = options.body ? JSON.parse(options.body) : {};
+
+  if (action === "health") return { ok: true };
+
+  if (action === "state") {
+    const snapshot = await _fbDb.ref("/").once("value");
+    return _fbFinalizeState(_fbMergeState(snapshot));
+  }
+
+  if (action === "member") {
+    const name = String(body.name || "").trim();
+    const className = String(body.className || "avatar-a").trim() || "avatar-a";
+    if (!name) throw new Error("name required");
+    const member = {
+      id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
+      name,
+      className,
+      joinedAt: Math.floor(Date.now() / 1000),
+      clientJoinId: body.clientJoinId || null,
+    };
+    await _fbDb.ref(`/members/${member.id}`).set(member);
+    const snapshot = await _fbDb.ref("/").once("value");
+    const result = _fbFinalizeState(_fbMergeState(snapshot));
+    result.currentMemberId = member.id;
+    return result;
+  }
+
+  if (action === "vote") {
+    const { memberId, destinationId, voteType } = body;
+    if (!["heart", "veto"].includes(voteType) || !memberId || !destinationId) throw new Error("invalid vote");
+    const voteRef = _fbDb.ref(`/votes/${destinationId}`);
+    const voteSnap = await voteRef.once("value");
+    const votes = voteSnap.val() || { heart: [], veto: [] };
+    votes.heart = (votes.heart || []).filter((id) => id !== memberId);
+    votes.veto = (votes.veto || []).filter((id) => id !== memberId);
+    if (!votes[voteType].includes(memberId)) votes[voteType].push(memberId);
+    await voteRef.set(votes);
+    const snapshot = await _fbDb.ref("/").once("value");
+    return _fbFinalizeState(_fbMergeState(snapshot));
+  }
+
+  if (action === "destination") {
+    const { memberId, destination } = body;
+    const destinationId = String(destination?.id || "");
+    if (!memberId || !destinationId) throw new Error("invalid destination");
+    await _fbDb.ref(`/customDestinations/${destinationId}`).set(destination);
+    await _fbDb.ref(`/votes/${destinationId}`).set(destination.votes || { heart: [memberId], veto: [] });
+    const snapshot = await _fbDb.ref("/").once("value");
+    return _fbFinalizeState(_fbMergeState(snapshot));
+  }
+
+  if (action === "comment") {
+    const { destinationId, memberId, text } = body;
+    if (!destinationId || !memberId || !String(text || "").trim()) throw new Error("invalid comment");
+    const member = members.find((m) => m.id === memberId);
+    const comment = {
+      id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
+      memberId,
+      memberName: member?.name || "匿名",
+      memberClass: member?.className || "avatar-a",
+      text: String(text).trim(),
+      createdAt: Math.floor(Date.now() / 1000),
+    };
+    await _fbDb.ref(`/comments/${destinationId}/${comment.id}`).set(comment);
+    const snapshot = await _fbDb.ref("/").once("value");
+    return _fbFinalizeState(_fbMergeState(snapshot));
+  }
+
+  throw new Error(`unknown firebase action: ${action}`);
+}
+
+// ---------- Firebase real-time listener ----------
+let _fbListenerActive = false;
+
+function startFirebaseListener() {
+  if (!_fbDb || _fbListenerActive) return;
+  _fbListenerActive = true;
+  _fbDb.ref("/").on("value", (snapshot) => {
+    const state = _fbFinalizeState(_fbMergeState(snapshot));
+    applySharedState(state);
+    if (screens.workspace.classList.contains("active")) {
+      renderWorkspace();
+    }
+  });
+}
+
 let project = {
   title: "福赛斯元旦5天 Happy 计划",
   travelStartDate: "2027-01-01",
@@ -942,6 +1064,9 @@ async function api(path, options = {}) {
     return response.json();
   }
 
+  // Prefer Firebase Realtime Database when available
+  if (_fbDb) return firebaseApi(path, options);
+
   if (apiMode === "local") return localApi(path, options);
 
   const cloudEndpoint = path;
@@ -1654,11 +1779,15 @@ async function initApp() {
     showScreen("join");
   }
   setInterval(updateCountdown, 1000);
-  setInterval(async () => {
-    if (screens.workspace.classList.contains("active")) {
-      await refreshSharedState();
-    }
-  }, 3500);
+  if (_fbDb) {
+    startFirebaseListener();
+  } else {
+    setInterval(async () => {
+      if (screens.workspace.classList.contains("active")) {
+        await refreshSharedState();
+      }
+    }, 3500);
+  }
 }
 
 initApp().catch(() => {
