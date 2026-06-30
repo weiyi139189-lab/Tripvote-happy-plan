@@ -1223,6 +1223,23 @@ button.avatar {
   font-weight: 950;
 }
 
+.budget-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--yellow);
+  background: rgba(200, 138, 27, 0.1);
+  border: 1px solid rgba(200, 138, 27, 0.25);
+  white-space: nowrap;
+}
+
+.card-topline .budget-tag {
+  margin-top: 8px;
+}
+
 .summary-table td:first-child em {
   margin-top: 7px;
   color: var(--teal);
