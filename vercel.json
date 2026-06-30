@@ -2,6 +2,5 @@
   "framework": null,
   "buildCommand": "mkdir -p public && cp index.html styles.css app.js public/",
   "outputDirectory": "public",
-  "cleanUrls": true,
-  "ignoreCommand": "exit 0"
+  "cleanUrls": true
 }
