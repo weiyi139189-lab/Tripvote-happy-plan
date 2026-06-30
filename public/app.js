@@ -107,7 +107,7 @@ function localApi(path, options = {}) {
 }
 
 // ---------- Firebase Realtime Database API ----------
-const _fbDb = typeof firebase !== "undefined" ? firebase.database() : null;
+const _fbDb = window.__firebaseReady && typeof firebase !== "undefined" ? firebase.database() : null;
 
 function _fbObjectToArray(obj) {
   if (!obj || typeof obj !== "object") return [];
