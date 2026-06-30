@@ -612,7 +612,7 @@ const destinationSeeds = [
     name: "普吉岛",
     recommender: "Gemini",
     headline: "热带度假牌 —— villa、海滩和跳岛都很完整",
-    budget: "5000-7000",
+    budget: "6500-9500",
     summary: {
       visaTraffic: "泰国免签，上海/国内大城市航班多，落地后建议包车。",
       strength: "度假基础设施成熟，适合住大 villa、吃海鲜、安排跳岛。",
@@ -634,7 +634,7 @@ const destinationSeeds = [
     name: "岘港",
     recommender: "Gemini",
     headline: "性价比之王 —— 一线海景与极致空间",
-    budget: "3500-5000",
+    budget: "4500-6500",
     summary: {
       visaTraffic: "越南电子签友好，直飞或转机都可控。",
       strength: "海景 villa 空间大，会安和巴拿山让 5 天行程很饱满。",
@@ -656,7 +656,7 @@ const destinationSeeds = [
     name: "济州岛",
     recommender: "Gemini",
     headline: "免签海岛线 —— 黑猪肉、海风与包车慢游",
-    budget: "5000-7000",
+    budget: "5500-8000",
     summary: {
       visaTraffic: "济州免签政策友好，建议包车或分组打车。",
       strength: "海岛氛围明确，大 house、海岸线和咖啡都适合团队。",
@@ -678,7 +678,7 @@ const destinationSeeds = [
     name: "冲绳",
     recommender: "Gemini",
     headline: "精致日式流 —— 海滨 house、和牛与自驾海岛",
-    budget: "7000-9000",
+    budget: "7500-11000",
     summary: {
       visaTraffic: "需要日本签证，直飞那霸体验稳定。",
       strength: "海岛质感好，自驾、海边住宿和餐饮品质都稳定。",
@@ -722,7 +722,7 @@ const destinationSeeds = [
     name: "哈尔滨",
     recommender: "邹某",
     headline: "东北反差线 —— 俄式街区、烧烤和松花江夜风",
-    budget: "3000-4500",
+    budget: "5500-8500",
     summary: {
       visaTraffic: "国内无签证，航班和高铁均可；元旦正好踩中冰雪氛围。",
       strength: "城市美食和建筑辨识度强，组织成本低。",
@@ -744,7 +744,7 @@ const destinationSeeds = [
     name: "巴厘岛",
     recommender: "邹某",
     headline: "Villa 天花板 —— 泳池、稻田和海边仪式感",
-    budget: "6000-8000",
+    budget: "9000-14000",
     summary: {
       visaTraffic: "印尼落地/电子签政策需确认，通常需要转机。",
       strength: "团队 villa 体验极强，适合把住宿本身做成核心目的。",
@@ -766,7 +766,7 @@ const destinationSeeds = [
     name: "琅勃拉邦",
     recommender: "邹某",
     headline: "慢旅行之王 —— 湄公河、寺庙和法式小城",
-    budget: "4000-5500",
+    budget: "5000-7500",
     summary: {
       visaTraffic: "老挝签证政策相对友好，航班通常需转机。",
       strength: "安静、独特、松弛，适合小众深度型团队。",
@@ -788,7 +788,7 @@ const destinationSeeds = [
     name: "加德满都",
     recommender: "邹某",
     headline: "精神冒险线 —— 古城、雪山视野和强烈异域感",
-    budget: "4500-6000",
+    budget: "8500-12000",
     summary: {
       visaTraffic: "尼泊尔签证相对友好，航班需关注转机。",
       strength: "文化冲击强，适合想要非典型旅行的团队。",
@@ -810,7 +810,7 @@ const destinationSeeds = [
     name: "斯里兰卡",
     recommender: "邹某",
     headline: "印度洋环线 —— 茶园、海岸和野生动物",
-    budget: "5000-7000",
+    budget: "8500-12000",
     summary: {
       visaTraffic: "需确认电子签/入境政策，通常需要转机。",
       strength: "海岸、茶园、古城和野生动物组合丰富。",
@@ -832,7 +832,7 @@ const destinationSeeds = [
     name: "乌兰巴托",
     recommender: "邹某",
     headline: "草原开阔感 —— 蒙古包、骑马和城市补给",
-    budget: "4000-6000",
+    budget: "7000-10000",
     summary: {
       visaTraffic: "需确认蒙古入境政策，航班季节性和价格要看。",
       strength: "草原体验开阔，团队记忆点强。",
@@ -854,7 +854,7 @@ const destinationSeeds = [
     name: "阿勒泰",
     recommender: "邹某",
     headline: "国内自然大片 —— 草原、湖泊和北疆松弛感",
-    budget: "3500-5000",
+    budget: "8500-12500",
     summary: {
       visaTraffic: "国内无签证，需关注飞阿勒泰/乌鲁木齐中转。",
       strength: "自然风景强，适合想要户外和大片感的团队。",
@@ -876,7 +876,7 @@ const destinationSeeds = [
     name: "札幌",
     recommender: "韩子",
     headline: "北海道清爽线 —— 海鲜、啤酒和城市近郊自然",
-    budget: "7000-10000",
+    budget: "12000-18000",
     summary: {
       visaTraffic: "需要日本签证，通常需飞札幌或转机。",
       strength: "餐饮稳定、城市干净，近郊自然体验舒服。",
@@ -898,7 +898,7 @@ const destinationSeeds = [
     name: "中国江西",
     recommender: "韩子",
     headline: "山水文化线 —— 景德镇、婺源和庐山任选主轴",
-    budget: "2500-3500",
+    budget: "3000-5000",
     summary: {
       visaTraffic: "国内无签证，高铁/飞机灵活。",
       strength: "文化、山水、陶瓷体验有层次，组织成本低。",
@@ -920,7 +920,7 @@ const destinationSeeds = [
     name: "中国广西",
     recommender: "韩子",
     headline: "山海双选线 —— 桂林山水或北部湾海边",
-    budget: "2500-3500",
+    budget: "3000-5000",
     summary: {
       visaTraffic: "国内无签证，南宁/桂林/北海均可作为入口。",
       strength: "山水和海边可二选一，团队接受度较高。",
@@ -942,7 +942,7 @@ const destinationSeeds = [
     name: "广西南宁/防城港",
     recommender: "Louis",
     headline: "低压海鲜线 —— 南宁夜宵加北部湾海风",
-    budget: "2000-3000",
+    budget: "3000-5000",
     summary: {
       visaTraffic: "国内无签证，高铁/飞机到南宁后转防城港。",
       strength: "吃和海边都轻松，适合预算友好的国内团队。",
@@ -964,7 +964,7 @@ const destinationSeeds = [
     name: "越南河内/胡志明",
     recommender: "Louis",
     headline: "城市越南线 —— 咖啡、美食和殖民街区",
-    budget: "3500-5000",
+    budget: "4500-6500",
     summary: {
       visaTraffic: "越南电子签友好，河内/胡志明航班选择多。",
       strength: "城市吃喝密度高，咖啡和夜生活都好安排。",
@@ -986,7 +986,7 @@ const destinationSeeds = [
     name: "曼谷",
     recommender: "Louis",
     headline: "城市松弛感 —— 美食、按摩和屋顶夜景",
-    budget: "4000-6000",
+    budget: "5500-8000",
     summary: {
       visaTraffic: "泰国免签，航班选择多，市内交通建议 BTS/MRT。",
       strength: "吃喝玩乐密度高，团队可自由分组。",
@@ -1008,7 +1008,7 @@ const destinationSeeds = [
     name: "下龙湾",
     recommender: "Louis",
     headline: "海上巡游线 —— 喀斯特海湾和一晚船宿",
-    budget: "4000-5500",
+    budget: "5500-7500",
     summary: {
       visaTraffic: "越南电子签，通常从河内进出再接驳下龙湾。",
       strength: "海上巡游很有记忆点，适合团队一起体验。",
